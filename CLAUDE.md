@@ -21,6 +21,7 @@
 - `npm start` — 앱 실행
 - `npm test` — `node --test`로 core 로직 테스트
 - `npm run dist:win` / `npm run dist:mac` — 설치 파일 생성(`dist/`). 아이콘 원본은 `build/icon.png`(1024px)
+- Mac은 electron-builder로 포장하면 시작 직후 SIGTRAP으로 꺼져서 `scripts/pack-mac.sh`가 원본 Electron.app에 앱 코드를 넣어 dmg를 만든다(실행하는 Mac의 칩용만 생성)
 - `.github/workflows/build.yml` — GitHub Actions에서 Windows·Mac 설치 파일 빌드
 
 ## 원칙
