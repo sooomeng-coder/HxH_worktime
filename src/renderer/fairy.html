@@ -14,7 +14,14 @@
       <div id="bubbleButtons"></div>
     </div>
 
-    <button id="gear" class="hit" title="설정">⚙</button>
+    <!-- 빠른 할 일 추가: + 버튼 → 입력칸, Enter로 추가(계속 입력 가능), Esc로 닫기 -->
+    <form id="quickAdd" class="hit" hidden>
+      <input id="quickInput" maxlength="100" placeholder="할 일을 적고 Enter" autocomplete="off">
+      <div id="quickMsg">Enter 추가 · Esc 닫기</div>
+    </form>
+
+    <button id="add" class="hit corner" title="할 일 추가">+</button>
+    <button id="gear" class="hit corner" title="설정">⚙</button>
 
     <div id="fairy" class="hit" title="클릭: 자세히 보기 · 드래그: 이동">
       <!-- 요정 그림(assets/fairy.png, 원본 좌표 516×800) 위에 LCD 글자와 눈을 덧그림 -->

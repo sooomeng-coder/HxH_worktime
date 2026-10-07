@@ -340,6 +340,12 @@ function registerIpc() {
     const max = screen.getDisplayMatching(settingsWin.getBounds()).workArea.height - 60;
     settingsWin.setContentSize(SETTINGS_WIDTH, Math.max(200, Math.min(max, Math.round(height))));
   });
+  // 할 일 입력칸을 열 때만 요정 창이 키보드 입력을 받도록 포커스 (사용자가 + 를 누른 경우)
+  ipcMain.on('fairy:focus', () => {
+    if (!fairyWin) return;
+    if (process.platform === 'darwin') app.focus({ steal: true });
+    fairyWin.focus();
+  });
   ipcMain.on('mouse:ignore', (_e, ignore) => {
     if (fairyWin && !dragOffset) fairyWin.setIgnoreMouseEvents(ignore, { forward: true });
   });

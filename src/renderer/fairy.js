@@ -5,6 +5,7 @@ let detailOpen = false;
 let prefs = { mouseReact: true, opacity: 1 };
 let clockJump = null;
 let bubbleKey = '';
+let adding = false; // 빠른 할 일 추가 입력칸이 열려 있음
 
 // 매초 다시 그리지만 내용이 같으면 그대로 둬서 버튼 클릭이 끊기지 않게 함
 function setBubble(html, buttons = []) {
@@ -64,7 +65,11 @@ function render() {
   $('lcd').textContent = lcd;
   $('lcd').style.fontSize = lcd.length > 5 ? '48px' : ''; // +10:00처럼 긴 값도 화면 안에
 
-  if (clockJump) {
+  if (adding) {
+    // 입력하는 동안은 말풍선을 가림 (입력칸과 같은 자리)
+    $('bubble').hidden = true;
+    bubbleKey = '';
+  } else if (clockJump) {
     const sign = clockJump.delta > 0 ? '+' : '-';
     setBubble(`컴퓨터 시계가 바뀌었어요 (${sign}${overBy(-Math.abs(clockJump.delta))}).<br><strong>퇴근 시각을 다시 계산할까요?</strong>`, [
       ['다시 계산', () => fairy.respondClock(true), true],
@@ -143,6 +148,39 @@ window.addEventListener('mouseup', (e) => {
 });
 
 $('gear').addEventListener('click', () => fairy.openSettings());
+
+// ── 빠른 할 일 추가 ──
+// 사용자가 + 를 눌렀을 때만 입력을 위해 요정 창에 포커스를 줌
+function openQuickAdd() {
+  adding = true;
+  detailOpen = false;
+  $('quickAdd').hidden = false;
+  $('quickMsg').className = '';
+  $('quickMsg').textContent = 'Enter 추가 · Esc 닫기';
+  render();
+  fairy.focusWidget();
+  $('quickInput').focus();
+}
+function closeQuickAdd() {
+  if (!adding) return;
+  adding = false;
+  $('quickAdd').hidden = true;
+  $('quickInput').value = '';
+  fairy.ignoreMouse(true);
+  render();
+}
+$('add').addEventListener('click', () => (adding ? closeQuickAdd() : openQuickAdd()));
+$('quickAdd').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = $('quickInput').value;
+  if (!text.trim()) return closeQuickAdd();
+  const res = await fairy.addTodo(text);
+  $('quickMsg').className = res.ok ? 'ok' : 'error';
+  $('quickMsg').textContent = res.ok ? `추가했어요 ✓ 오늘 할 일 ${res.todos.list.length}개` : res.error;
+  if (res.ok) $('quickInput').value = '';
+});
+$('quickInput').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeQuickAdd(); });
+window.addEventListener('blur', closeQuickAdd); // 다른 곳을 클릭하면 닫힘
 
 function applyPrefs(p) {
   prefs = p;

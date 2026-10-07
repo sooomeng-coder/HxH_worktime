@@ -67,11 +67,10 @@ body.ended .eye-open { display: none; }
 body.ended .eye-closed { display: inline; }
 body.ended #fairy { animation-duration: 6s; }
 
-/* ── 설정 버튼 ── */
-#gear {
+/* ── 설정·할 일 추가 버튼 (요정에 마우스를 올리면 보임) ── */
+.corner {
   position: absolute;
   top: 126px;
-  right: 14px;
   width: 24px;
   height: 24px;
   border: none;
@@ -87,7 +86,34 @@ body.ended #fairy { animation-duration: 6s; }
   transition: opacity 0.2s;
   z-index: 2;
 }
-#stage:hover #gear { opacity: 1; }
+#gear { right: 14px; }
+#add { right: 42px; font-size: 17px; font-weight: 700; }
+#stage:hover .corner { opacity: 1; }
+
+/* ── 빠른 할 일 추가 ── */
+#quickAdd {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 176px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--bubble-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+#quickInput {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #dfe6ee;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  outline-color: var(--suit);
+}
+#quickMsg { margin-top: 4px; font-size: 10px; color: #8a8f98; text-align: center; }
+#quickMsg.ok { color: #2f8a57; }
+#quickMsg.error { color: #d6336c; }
 
 /* ── 말풍선 ── */
 #bubble {
