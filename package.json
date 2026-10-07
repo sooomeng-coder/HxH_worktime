@@ -12,7 +12,7 @@
     "dist:mac": "electron-builder --mac"
   },
   "devDependencies": {
-    "electron": "^44.6.0",
+    "electron": "^40.10.6",
     "electron-builder": "^26.15.3"
   },
   "author": "sooomeng",
@@ -65,7 +65,6 @@
       ],
       "category": "Utility"
     },
-    "afterPack": "build/afterPack.js",
-    "asar": false
+    "afterPack": "build/afterPack.js"
   }
 }
