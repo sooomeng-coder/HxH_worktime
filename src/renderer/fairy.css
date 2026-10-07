@@ -10,7 +10,11 @@ html, body {
   background: transparent;
   overflow: hidden;
   user-select: none;
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  /* 앱에 폰트를 넣지 않고 PC에 있는 폰트 중 깔끔한 것부터 사용
+     (Pretendard 설치 시 → 맥 기본 → Windows: 영문·숫자 Segoe UI + 한글 맑은 고딕) */
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 
 #stage {
@@ -52,7 +56,8 @@ html, body {
 .head { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
 .lcd { fill: #cfe7ee; stroke: #26292e; stroke-width: 3; }
 #lcd {
-  font-family: "DS-Digital", "Consolas", "Menlo", monospace;
+  font-family: "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px;
