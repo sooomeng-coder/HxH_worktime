@@ -12,7 +12,7 @@
 - `src/core/nudge.js` — 무작위 할 일 확인 말풍선 순수 함수 (빈도별 간격, 나중에/숨기기/오늘 끄기).
 - `src/core/prefs.js` — 요정 표시 설정(크기·투명도·마우스 반응·숨기기) 정규화.
 - `src/main.js` — 메인 프로세스: 창 생성, IPC, 상태 저장, 트레이·단축키, 30초 주기 점검(날짜 전환·시계 변경·말풍선), 절전 복귀 처리.
-- `assets/` — 요정 그림(`fairy.png`, LCD 숫자와 눈은 지운 상태 — 화면에서 SVG로 덧그림), 앱·트레이 아이콘(`icon.svg`가 원본).
+- `assets/` — 요정 그림(`fairy.png`, LCD 숫자와 눈은 지운 상태 — 화면에서 SVG로 덧그림), 앱 아이콘 `icon.png`·트레이 아이콘 `tray*.png`(요정 그림 원본에서 생성, 설치 파일용 1024px은 `build/icon.png`).
 - `src/store.js` — `userData/state.json` 저장/로드 (원자적 쓰기).
 - `src/preload.js` — renderer에 `window.fairy`(IPC)와 `window.wt`(계산 함수)를 노출.
 - `src/renderer/` — `fairy.*`(요정 위젯), `settings.*`(설정 창). 번들러 없이 순수 HTML/CSS/JS.
