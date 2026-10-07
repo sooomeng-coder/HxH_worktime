@@ -21,6 +21,8 @@ run_for() { # $1=라벨, 나머지=명령. 10초 버티면 0
 if run_for packaged "$BIN" --enable-logging=stderr; then exit 0; fi
 
 if [ "$(uname)" = "Darwin" ]; then
+  echo "── 진단: 자동 실행 등록을 건너뛴 패키징 앱"
+  FAIRY_SKIP_LOGIN_ITEM=1 run_for packaged-no-login "$BIN" --enable-logging=stderr || true
   echo "── 진단: 패키징 전 앱(npx electron .)"
   run_for unpacked npx electron . --enable-logging=stderr || true
   echo "── 진단: 코드 서명"
