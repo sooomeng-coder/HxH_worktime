@@ -21,18 +21,16 @@ run_for() { # $1=라벨, 나머지=명령. 10초 버티면 0
 if run_for packaged "$BIN" --enable-logging=stderr; then exit 0; fi
 
 if [ "$(uname)" = "Darwin" ]; then
-  APPDIR="$(cd "$(dirname "$BIN")/../Resources/app" && pwd)"
-  echo "── 진단 1: 영문 설정 폴더(--user-data-dir)로 실행"
-  run_for ascii-userdata "$BIN" --user-data-dir=/tmp/fairy-smoke-userdata || true
-  echo "── 진단 2: 원본 Electron 실행 파일로 패키징된 앱 코드 실행"
-  run_for stock-electron npx electron "$APPDIR" || true
-  echo "── 진단 3: 패키징 앱의 main.js를 최소 코드로 바꿔 실행"
-  cp "$APPDIR/src/main.js" /tmp/main.js.bak
-  echo "require('electron').app.whenReady().then(() => console.log('minimal ready'))" > "$APPDIR/src/main.js"
-  run_for minimal-main "$BIN" || true
-  cp /tmp/main.js.bak "$APPDIR/src/main.js"
-  echo "── 진단: 패키징 전 앱(npx electron .)"
-  run_for unpacked npx electron . --enable-logging=stderr || true
+  APP="$(cd "$(dirname "$BIN")/../.." && pwd)"
+  STOCK="$PWD/node_modules/electron/dist/Electron.app"
+  echo "── 진단 1: 패키징 앱을 영문 경로로 복사해 실행"
+  rm -rf /tmp/fairy-ascii && mkdir -p /tmp/fairy-ascii && cp -R "$APP" /tmp/fairy-ascii/Fairy.app
+  run_for ascii-path "/tmp/fairy-ascii/Fairy.app/Contents/MacOS/$(basename "$BIN")" || true
+  echo "── 진단 2: 원본 Electron(영문 경로)으로 이 앱 실행"
+  run_for stock-ascii "$STOCK/Contents/MacOS/Electron" "$PWD" || true
+  echo "── 진단 3: 원본 Electron을 한글 경로로 복사해 이 앱 실행"
+  rm -rf "/tmp/퇴근 요정 테스트" && mkdir -p "/tmp/퇴근 요정 테스트" && cp -R "$STOCK" "/tmp/퇴근 요정 테스트/"
+  run_for stock-korean "/tmp/퇴근 요정 테스트/Electron.app/Contents/MacOS/Electron" "$PWD" || true
   echo "── 진단: 코드 서명"
   codesign -dvvv "$BIN" 2>&1 | head -20
   echo "── 진단: 충돌 보고서(멈춘 스레드)"
