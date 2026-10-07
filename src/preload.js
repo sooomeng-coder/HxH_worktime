@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('fairy', {
   onState: (cb) => ipcRenderer.on('state:changed', (_e, day) => cb(day)),
   onCursor: (cb) => ipcRenderer.on('cursor', (_e, p) => cb(p)),
   openSettings: () => ipcRenderer.send('settings:open'),
+  fitSettings: (height) => ipcRenderer.send('settings:fit', height),
   ignoreMouse: (ignore) => ipcRenderer.send('mouse:ignore', ignore),
   dragStart: () => ipcRenderer.send('drag:start'),
   dragEnd: () => ipcRenderer.send('drag:end'),

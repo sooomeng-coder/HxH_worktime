@@ -4,93 +4,61 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
   <title>퇴근 요정 설정</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 18px;
-      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      font-size: 14px;
-      color: #3b2f4a;
-      background: #fff8fb;
-    }
-    h2 { font-size: 13px; margin: 18px 0 8px; color: #8a6fa8; }
-    h2:first-child { margin-top: 0; }
-    label { display: flex; align-items: center; gap: 8px; padding: 4px 0; white-space: nowrap; }
-    input[type="number"] { width: 44px; }
-    #summary {
-      margin-top: 18px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-      line-height: 1.6;
-    }
-    #summary strong { font-size: 16px; }
-    #error, .error { color: #d6336c; min-height: 18px; margin-top: 6px; font-size: 12px; }
-    .note { font-size: 11px; opacity: 0.7; margin-top: 8px; }
-    #todoForm { display: flex; gap: 6px; }
-    #todoInput { flex: 1; padding: 6px 8px; border: 1px solid #e3d8ee; border-radius: 8px; font: inherit; }
-    #todoForm button { border: none; border-radius: 8px; padding: 0 12px; background: #a9d5f0; font: inherit; font-weight: 700; cursor: pointer; }
-    #todoList { list-style: none; padding: 0; margin: 8px 0 0; }
-    #todoList li { display: flex; align-items: center; gap: 8px; padding: 5px 2px; border-bottom: 1px dashed #eee3f3; }
-    #todoList li span { flex: 1; word-break: break-all; }
-    #todoList li.done span { text-decoration: line-through; opacity: 0.5; }
-    #todoList li button { border: none; background: none; color: #b9a6c9; cursor: pointer; font-size: 13px; }
-    #todoEmpty { font-size: 12px; opacity: 0.6; margin-top: 8px; }
-    #todoCount { font-weight: normal; opacity: 0.8; }
-    #nudgeRow { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; }
-    #nudgeRow select { font: inherit; padding: 2px 4px; }
-    .range { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
-    .range span:first-child { width: 52px; }
-    .range input { flex: 1; }
-    .range output { width: 40px; text-align: right; font-size: 12px; opacity: 0.8; }
-    #nudgeOn { border: none; border-radius: 8px; padding: 3px 8px; background: #eef3f7; font: inherit; font-size: 12px; cursor: pointer; }
-  </style>
+  <link rel="stylesheet" href="settings.css">
 </head>
 <body>
-  <h2>오늘의 근무 유형</h2>
-  <label><input type="radio" name="type" value="normal"> 일반근무 (9시간)</label>
-  <label><input type="radio" name="type" value="half"> 반차 (4시간)</label>
-  <label>
-    <input type="radio" name="type" value="flex"> 유연근무
-    <input type="number" id="flexH" min="0" max="23"> 시간
-    <input type="number" id="flexM" min="0" max="59" step="5"> 분
-  </label>
+  <!-- 근무 유형: 둘 다 해제면 일반근무 -->
+  <div class="row types">
+    <label><input type="checkbox" id="half"> 반차</label>
+    <label><input type="checkbox" id="flex"> 유연근무</label>
+    <span id="flexTime" hidden>
+      <input type="number" id="flexH" min="1" max="23"> :
+      <input type="number" id="flexM" min="0" max="59" step="5">
+    </span>
+  </div>
 
   <h2>업무 시작 시각</h2>
-  <label><input type="radio" name="start" value="boot"> 부팅 시각 <span id="bootLabel"></span></label>
-  <label><input type="radio" name="start" value="boot_plus_10"> 부팅 10분 후 <span id="boot10Label"></span></label>
-  <label><input type="radio" name="start" value="manual"> 직접 입력 <input type="time" id="manualTime"></label>
-  <div id="error"></div>
+  <div class="row">
+    <span id="startClock" class="big">--:--</span>
+    <button id="editStart" class="ghost">수정</button>
+  </div>
+  <div id="startEditor" hidden>
+    <div class="row">
+      <input type="time" id="manualTime">
+      <button id="saveStart" class="primary">저장</button>
+    </div>
+    <div class="row chips">
+      <button id="useBoot" class="chip"></button>
+      <button id="useBoot10" class="chip"></button>
+    </div>
+  </div>
+  <div id="endLine" class="muted"></div>
+  <div id="error" class="error"></div>
 
-  <div id="summary"></div>
-  <div class="note">계산 결과는 개인 참고용이며, 회사의 공식 근태 기록과 다를 수 있어요.</div>
-
-  <h2>오늘의 할 일 <span id="todoCount"></span></h2>
-  <form id="todoForm">
+  <h2>체크리스트</h2>
+  <form id="todoForm" class="row">
     <input id="todoInput" maxlength="100" placeholder="할 일을 적고 Enter" autocomplete="off">
-    <button type="submit">추가</button>
+    <button type="submit" class="primary">추가</button>
   </form>
   <div id="todoError" class="error"></div>
   <ul id="todoList"></ul>
-  <div id="todoEmpty">할 일 없이 타이머만 써도 괜찮아요.</div>
-  <div id="nudgeRow">
-    요정이 가끔 물어보기
-    <select id="nudgeFreq">
-      <option value="off">끄기</option>
-      <option value="low">낮음 (2~3시간)</option>
-      <option value="normal">보통 (1.5~2시간)</option>
-      <option value="high">높음 (1~1.5시간)</option>
-    </select>
-    <button id="nudgeOn" hidden>오늘 다시 켜기</button>
-  </div>
 
-  <h2>요정 표시</h2>
-  <div class="range"><span>크기</span><input type="range" id="scale" min="70" max="150" step="10"><output id="scaleOut"></output></div>
-  <div class="range"><span>투명도</span><input type="range" id="opacity" min="30" max="100" step="10"><output id="opacityOut"></output></div>
-  <label><input type="checkbox" id="mouseReact"> 마우스를 따라 쳐다보기</label>
-  <label><input type="checkbox" id="hidden"> 요정 숨기기</label>
-  <div class="note">발표·영상 시청 중엔 <b id="shortcut"></b> 로 바로 숨기거나 다시 보이게 할 수 있어요. 트레이(작업 표시줄) 아이콘에서도 할 수 있어요.</div>
+  <details id="widget">
+    <summary>위젯 설정</summary>
+    <div class="range"><span>크기</span><input type="range" id="scale" min="70" max="150" step="10"><output id="scaleOut"></output></div>
+    <div class="range"><span>투명도</span><input type="range" id="opacity" min="30" max="100" step="10"><output id="opacityOut"></output></div>
+    <div class="range"><span>할 일 확인</span>
+      <select id="nudgeFreq">
+        <option value="off">끄기</option>
+        <option value="low">가끔 (2~3시간)</option>
+        <option value="normal">보통 (1.5~2시간)</option>
+        <option value="high">자주 (1~1.5시간)</option>
+      </select>
+      <button id="nudgeOn" class="chip" hidden>오늘 다시 켜기</button>
+    </div>
+    <label><input type="checkbox" id="mouseReact"> 마우스 따라 쳐다보기</label>
+    <label><input type="checkbox" id="hidden"> 요정 숨기기 <span class="muted" id="shortcut"></span></label>
+  </details>
 
   <script src="settings.js"></script>
 </body>

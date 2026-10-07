@@ -13,6 +13,7 @@ const FAIRY_SIZE = { width: 200, height: 300 };
 
 const TOGGLE_SHORTCUT = 'CommandOrControl+Alt+H';
 const CLOCK_JUMP_MS = 2 * 60 * 1000;
+const SETTINGS_WIDTH = 270;
 
 let state; // { day, todos, nudge, prefs, widget: { x, y } }
 let fairyWin = null;
@@ -227,9 +228,10 @@ function openSettings() {
     return;
   }
   settingsWin = new BrowserWindow({
-    width: 320,
-    height: Math.min(900, screen.getPrimaryDisplay().workArea.height - 40),
-    resizable: true,
+    width: SETTINGS_WIDTH,
+    height: 360, // 내용이 그려지면 renderer가 높이를 맞춤 (settings:fit)
+    useContentSize: true,
+    resizable: false,
     minimizable: false,
     maximizable: false,
     alwaysOnTop: true,
@@ -329,6 +331,11 @@ function registerIpc() {
   });
 
   ipcMain.on('settings:open', openSettings);
+  ipcMain.on('settings:fit', (_e, height) => {
+    if (!settingsWin || settingsWin.isDestroyed()) return;
+    const max = screen.getDisplayMatching(settingsWin.getBounds()).workArea.height - 60;
+    settingsWin.setContentSize(SETTINGS_WIDTH, Math.max(200, Math.min(max, Math.round(height))));
+  });
   ipcMain.on('mouse:ignore', (_e, ignore) => {
     if (fairyWin && !dragOffset) fairyWin.setIgnoreMouseEvents(ignore, { forward: true });
   });

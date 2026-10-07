@@ -1,80 +1,69 @@
 const $ = (id) => document.getElementById(id);
 let day = null;
 
-function showError(msg) {
-  $('error').textContent = msg || '';
+const showError = (msg) => { $('error').textContent = msg || ''; fitWindow(); };
+
+// 내용 높이에 맞춰 창 크기 조절 (위젯 설정을 펼치고 접을 때 등)
+function fitWindow() {
+  requestAnimationFrame(() => fairy.fitSettings(Math.ceil(document.body.scrollHeight)));
 }
 
+// ── 근무 유형·시작 시각 ──
 function render() {
-  document.querySelector(`input[name="type"][value="${day.workType}"]`).checked = true;
-  document.querySelector(`input[name="start"][value="${day.startMode}"]`).checked = true;
+  $('half').checked = day.workType === 'half';
+  $('flex').checked = day.workType === 'flex';
+  $('flexTime').hidden = day.workType !== 'flex';
   $('flexH').value = Math.floor(day.flexMinutes / 60);
-  $('flexM').value = day.flexMinutes % 60;
-  $('bootLabel').textContent = `(${wt.formatClock(day.baseStart)})`;
-  $('boot10Label').textContent = `(${wt.formatClock(day.baseStart + 10 * 60000)})`;
-  if (document.activeElement !== $('manualTime')) $('manualTime').value = wt.formatClock(day.start);
+  $('flexM').value = String(day.flexMinutes % 60).padStart(2, '0');
 
-  const left = wt.remaining(day, Date.now());
-  if (day.waiting) {
-    $('summary').innerHTML = '<strong>새 근무일 대기 중</strong><br>컴퓨터를 쓰기 시작하면 타이머가 켜져요.<br>바로 시작하려면 위에서 시작 시각을 직접 입력하세요.';
-    return;
-  }
-  $('summary').innerHTML =
-    `<strong>${wt.formatClock(wt.endTime(day))} 퇴근 예정</strong><br>` +
-    `${wt.START_MODES[day.startMode]} ${wt.formatClock(day.start)} 시작 + ` +
-    `${wt.WORK_TYPES[day.workType].label} ${Math.floor(day.workMinutes / 60)}시간` +
-    `${day.workMinutes % 60 ? ` ${day.workMinutes % 60}분` : ''}<br>` +
-    (left > 0 ? `남은 시간 ${wt.formatDuration(left)}` : `퇴근 시각이 ${wt.formatDuration(left)} 지났어요`);
+  $('startClock').textContent = day.waiting ? '--:--' : wt.formatClock(day.start);
+  $('useBoot').textContent = `부팅 시각 ${wt.formatClock(day.baseStart)}`;
+  $('useBoot10').textContent = `부팅 10분 후 ${wt.formatClock(day.baseStart + 10 * 60000)}`;
+  $('endLine').textContent = day.waiting
+    ? '컴퓨터를 쓰기 시작하면 타이머가 켜져요'
+    : `→ ${wt.formatClock(wt.endTime(day))} 퇴근 예정 (개인 참고용)`;
+  fitWindow();
 }
 
 async function apply(promise) {
   const res = await promise;
-  if (!res.ok) {
-    showError(res.error);
-    render(); // 실패하면 이전 선택으로 되돌림
-    return;
+  showError(res.ok ? '' : res.error);
+  if (res.ok) {
+    day = res.day;
+    $('startEditor').hidden = true;
   }
-  showError('');
-  day = res.day;
-  render();
+  render(); // 실패하면 이전 값으로 되돌림
 }
 
-function flexMinutes() {
-  return (parseInt($('flexH').value, 10) || 0) * 60 + (parseInt($('flexM').value, 10) || 0);
-}
+const flexMinutes = () => (parseInt($('flexH').value, 10) || 0) * 60 + (parseInt($('flexM').value, 10) || 0);
 
-for (const r of document.querySelectorAll('input[name="type"]')) {
-  r.addEventListener('change', () =>
-    apply(fairy.setWorkType(r.value, r.value === 'flex' ? flexMinutes() : undefined)));
-}
+// 반차·유연근무는 하나만 선택, 둘 다 해제하면 일반근무
+$('half').addEventListener('change', () => apply(fairy.setWorkType($('half').checked ? 'half' : 'normal')));
+$('flex').addEventListener('change', () =>
+  apply($('flex').checked ? fairy.setWorkType('flex', flexMinutes()) : fairy.setWorkType('normal')));
 for (const id of ['flexH', 'flexM']) {
   $(id).addEventListener('change', () => apply(fairy.setWorkType('flex', flexMinutes())));
 }
 
-function applyManual() {
+$('editStart').addEventListener('click', () => {
+  $('startEditor').hidden = !$('startEditor').hidden;
+  $('manualTime').value = wt.formatClock(day.waiting ? Date.now() : day.start);
+  if (!$('startEditor').hidden) $('manualTime').focus();
+  fitWindow();
+});
+$('saveStart').addEventListener('click', () => {
   const ms = wt.timeOnDay(day.baseStart, $('manualTime').value);
   if (Number.isNaN(ms)) return showError('시각을 HH:MM 형식으로 입력해 주세요.');
   apply(fairy.setStart('manual', ms));
-}
-for (const r of document.querySelectorAll('input[name="start"]')) {
-  r.addEventListener('change', () => (r.value === 'manual' ? applyManual() : apply(fairy.setStart(r.value))));
-}
-$('manualTime').addEventListener('change', () => {
-  document.querySelector('input[name="start"][value="manual"]').checked = true;
-  applyManual();
 });
+$('manualTime').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('saveStart').click(); });
+$('useBoot').addEventListener('click', () => apply(fairy.setStart('boot')));
+$('useBoot10').addEventListener('click', () => apply(fairy.setStart('boot_plus_10')));
 
-fairy.onState((d) => { day = d; render(); });
-fairy.getState().then((d) => { day = d; render(); });
-setInterval(() => day && render(), 30000);
-
-// ── 오늘의 할 일 ──
+// ── 체크리스트 ──
 function renderTodos({ list, nudge }) {
   $('nudgeFreq').value = nudge.freq;
   $('nudgeOn').hidden = !(nudge.offToday && nudge.freq !== 'off');
-  const done = list.filter((t) => t.done).length;
-  $('todoCount').textContent = list.length ? `(${done}/${list.length} 완료)` : '';
-  $('todoEmpty').hidden = list.length > 0;
   $('todoList').replaceChildren(...list.map((t) => {
     const li = document.createElement('li');
     li.className = t.done ? 'done' : '';
@@ -91,6 +80,7 @@ function renderTodos({ list, nudge }) {
     li.append(box, text, del);
     return li;
   }));
+  fitWindow();
 }
 
 $('todoForm').addEventListener('submit', async (e) => {
@@ -98,12 +88,10 @@ $('todoForm').addEventListener('submit', async (e) => {
   const res = await fairy.addTodo($('todoInput').value);
   $('todoError').textContent = res.ok ? '' : res.error;
   if (res.ok) $('todoInput').value = '';
+  fitWindow();
 });
 
-$('nudgeFreq').addEventListener('change', () => fairy.setNudgeFreq($('nudgeFreq').value));
-$('nudgeOn').addEventListener('click', () => fairy.turnOnNudge());
-
-// ── 요정 표시 ──
+// ── 위젯 설정 ──
 function renderPrefs(p) {
   $('scale').value = Math.round(p.scale * 100);
   $('scaleOut').textContent = `${Math.round(p.scale * 100)}%`;
@@ -116,9 +104,15 @@ $('scale').addEventListener('change', () => fairy.setPrefs({ scale: $('scale').v
 $('opacity').addEventListener('input', () => fairy.setPrefs({ opacity: $('opacity').value / 100 }));
 $('mouseReact').addEventListener('change', () => fairy.setPrefs({ mouseReact: $('mouseReact').checked }));
 $('hidden').addEventListener('change', () => fairy.setPrefs({ hidden: $('hidden').checked }));
-$('shortcut').textContent = navigator.platform.startsWith('Mac') ? '⌘ + ⌥ + H' : 'Ctrl + Alt + H';
-fairy.onPrefs(renderPrefs);
-fairy.getPrefs().then(renderPrefs);
+$('nudgeFreq').addEventListener('change', () => fairy.setNudgeFreq($('nudgeFreq').value));
+$('nudgeOn').addEventListener('click', () => fairy.turnOnNudge());
+$('shortcut').textContent = navigator.platform.startsWith('Mac') ? '⌘⌥H' : 'Ctrl+Alt+H';
+$('widget').addEventListener('toggle', fitWindow);
 
+fairy.onState((d) => { day = d; render(); });
+fairy.getState().then((d) => { day = d; render(); });
 fairy.onTodos(renderTodos);
 fairy.getTodos().then(renderTodos);
+fairy.onPrefs(renderPrefs);
+fairy.getPrefs().then(renderPrefs);
+setInterval(() => day && render(), 30000);

@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 13px;
+  color: #2b2f36;
+  background: #fff;
+}
+h2 { font-size: 13px; margin: 16px 0 6px; }
+.row { display: flex; align-items: center; gap: 8px; }
+label { display: flex; align-items: center; gap: 6px; padding: 3px 0; white-space: nowrap; cursor: pointer; }
+.types { gap: 18px; }
+#flexTime input { width: 38px; }
+.big { font-size: 15px; min-width: 52px; }
+.muted { font-size: 11px; color: #8a8f98; }
+.error { color: #d6336c; font-size: 11px; min-height: 0; }
+.error:not(:empty) { margin-top: 4px; }
+
+button { font: inherit; cursor: pointer; }
+.primary { border: none; border-radius: 6px; padding: 4px 10px; background: #a9d5f0; font-weight: 700; }
+.ghost { border: 1.5px solid #2b2f36; border-radius: 2px; padding: 1px 8px; background: #fff; }
+.chip { border: none; border-radius: 10px; padding: 2px 8px; background: #eef3f7; font-size: 11px; }
+#startEditor { margin-top: 6px; }
+#startEditor .chips { margin-top: 6px; }
+#endLine { margin-top: 4px; }
+
+#todoForm input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid #dfe6ee;
+  border-radius: 6px;
+  font: inherit;
+}
+#todoList { list-style: none; padding: 0; margin: 6px 0 0; }
+#todoList li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border-bottom: 1px dashed #f0d9e2;
+  background: #fff7fa;
+}
+#todoList li span { flex: 1; word-break: break-all; }
+#todoList li.done span { text-decoration: line-through; opacity: 0.5; }
+#todoList li button { border: none; background: none; color: #b9a6c9; font-size: 12px; }
+
+details { margin-top: 16px; }
+summary { font-weight: 700; cursor: pointer; list-style: none; user-select: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: " ▽"; font-weight: normal; }
+details[open] summary::after { content: " △"; }
+details[open] summary { margin-bottom: 6px; }
+.range { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.range > span { width: 60px; white-space: nowrap; }
+.range input[type="range"] { flex: 1; }
+.range output { width: 36px; text-align: right; font-size: 11px; color: #8a8f98; }
+.range select { font: inherit; flex: 1; min-width: 0; }
