@@ -1,0 +1,14 @@
+{
+  "name": "kkeujeok",
+  "productName": "끄적",
+  "version": "0.1.0",
+  "description": "할 일, 아이디어, 메모를 한곳에 빠르게 끄적이는 PC 위젯",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>끄적</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="titlebar">
+    <span class="logo">끄적</span>
+    <div class="win-buttons">
+      <button id="pin" class="icon-btn" title="항상 위에 표시">📌</button>
+      <button id="close" class="icon-btn" title="숨기기 (Esc)">✕</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-filter="all" class="active">전체 <span class="count"></span></button>
+    <button data-filter="todo">할 일 <span class="count"></span></button>
+    <button data-filter="idea">아이디어 <span class="count"></span></button>
+    <button data-filter="memo">메모 <span class="count"></span></button>
+  </nav>
+
+  <main>
+    <ul id="list" class="list"></ul>
+    <div id="empty" class="empty" hidden>
+      <p>머릿속에 있는 거 아무거나 던져보세요.</p>
+      <p class="hint">분류는 나중에 해도 돼요.</p>
+    </div>
+    <button id="clear-done" class="clear-done" hidden>완료한 할 일 지우기</button>
+  </main>
+
+  <div id="toast" class="toast" hidden>
+    <span>삭제했어요</span>
+    <button id="undo">되돌리기</button>
+  </div>
+
+  <footer class="composer">
+    <button id="type-chip" class="type-chip" title="종류 바꾸기 (Tab)"></button>
+    <input id="input" type="text" placeholder="끄적끄적… (Enter)" autocomplete="off" spellcheck="false">
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
