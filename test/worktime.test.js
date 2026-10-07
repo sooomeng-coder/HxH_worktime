@@ -87,3 +87,32 @@ test('알림 숨기기는 오늘 알림을 끄고, 일정이 바뀌면 다시 �
   assert.equal(wt.alertDue(changed, at(18, 9)), false);
   assert.equal(wt.alertDue(changed, at(18, 10)), true);
 });
+
+test('켜둔 채 자정을 넘기면: 퇴근했으면 바로, 추가 근무 중이면 새벽 4시에 새 근무일', () => {
+  const day = wt.createDay(at(9, 0), at(9, 0));
+  assert.equal(wt.shouldRollOver(day, at(23, 59)), false);
+  assert.equal(wt.shouldRollOver(day, at(0, 30, 8)), false);
+  assert.equal(wt.shouldRollOver(day, at(4, 0, 8)), true);
+  const ended = wt.respondAlert(day, 'end', at(18, 0));
+  assert.equal(wt.shouldRollOver(ended, at(0, 1, 8)), true);
+});
+
+test('시계가 바뀌면 저장된 시각을 같은 만큼 옮겨 남은 시간을 유지', () => {
+  const day = wt.respondAlert(wt.createDay(at(9, 0), at(9, 0)), 'overtime', at(18, 0));
+  const shifted = wt.shiftDay(day, 60 * 60 * 1000);
+  assert.equal(shifted.start, at(10, 0));
+  assert.equal(shifted.nextAlertAt, at(19, 30));
+  assert.equal(shifted.endedAt, null);
+  assert.equal(wt.remaining(shifted, at(12, 0)), wt.remaining(day, at(11, 0)));
+});
+
+test('켜둔 PC의 새 근무일은 사용자가 돌아올 때 타이머 시작', () => {
+  const waiting = wt.createWaitingDay(at(4, 0, 8));
+  assert.equal(waiting.waiting, true);
+  assert.equal(wt.alertDue(waiting, at(20, 0, 8)), false);
+  const started = wt.startWhenActive(waiting, at(8, 52, 8));
+  assert.equal(started.waiting, false);
+  assert.equal(started.start, at(8, 52, 8));
+  assert.equal(wt.formatClock(wt.endTime(started)), '17:52');
+  assert.equal(wt.startWhenActive(started, at(10, 0, 8)), started);
+});

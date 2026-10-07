@@ -48,6 +48,37 @@ function createDay(bootMs, nowMs) {
   };
 }
 
+// 앱을 켜둔 채 자정을 넘겼을 때 새 근무일로 넘어갈지.
+// 아직 추가 근무 중(타이머 종료 전)이면 새벽 4시까지는 어제 근무로 본다
+const ROLLOVER_HOUR = 4;
+function shouldRollOver(day, nowMs) {
+  if (!day || day.date === dateKey(nowMs)) return false;
+  return !!day.endedAt || new Date(nowMs).getHours() >= ROLLOVER_HOUR;
+}
+
+// 켜둔 PC에서 날짜가 바뀐 새 근무일: 사용자가 돌아와 컴퓨터를 쓰기 시작할 때 타이머 시작
+function createWaitingDay(nowMs) {
+  return { ...createDay(nowMs, nowMs), waiting: true };
+}
+
+function startWhenActive(day, nowMs) {
+  if (!day.waiting) return day;
+  const start = floorToMinute(nowMs);
+  return { ...day, waiting: false, baseStart: start, start };
+}
+
+// 시스템 시계가 deltaMs만큼 바뀌었을 때, 저장된 시각들을 같은 만큼 옮겨 다시 계산
+function shiftDay(day, deltaMs) {
+  const move = (ms) => (ms == null ? ms : ms + deltaMs);
+  return {
+    ...day,
+    baseStart: move(day.baseStart),
+    start: move(day.start),
+    endedAt: move(day.endedAt),
+    nextAlertAt: move(day.nextAlertAt),
+  };
+}
+
 // 저장된 기록이 오늘 것이 아니면 새 근무일을 만든다
 function ensureToday(day, bootMs, nowMs) {
   if (day && day.date === dateKey(nowMs)) return day;
@@ -95,14 +126,14 @@ function setStart(day, mode, nowMs, manualMs) {
 
   if (!Number.isFinite(start)) throw new Error('시작 시각이 올바르지 않습니다.');
   if (start > nowMs) throw new Error('현재 시각 이후로는 시작 시각을 정할 수 없어요.');
-  return { ...resetAlert(day), startMode: mode, start };
+  return { ...resetAlert(day), startMode: mode, start, waiting: false };
 }
 
 const OVERTIME_REMIND_MINUTES = 30;
 
 // 퇴근 가능 알림을 띄워야 하는지
 function alertDue(day, nowMs) {
-  if (day.endedAt || day.alertOff) return false;
+  if (day.waiting || day.endedAt || day.alertOff) return false;
   return nowMs >= (day.nextAlertAt ?? endTime(day));
 }
 
@@ -155,6 +186,10 @@ module.exports = {
   dateKey,
   createDay,
   ensureToday,
+  shouldRollOver,
+  createWaitingDay,
+  startWhenActive,
+  shiftDay,
   endTime,
   remaining,
   setWorkType,

@@ -2,6 +2,8 @@ const $ = (id) => document.getElementById(id);
 let day = null;
 let todos = { list: [], leftovers: [], nudge: { todo: null } };
 let detailOpen = false;
+let prefs = { mouseReact: true, opacity: 1 };
+let clockJump = null;
 let bubbleKey = '';
 
 // 매초 다시 그리지만 내용이 같으면 그대로 둬서 버튼 클릭이 끊기지 않게 함
@@ -40,6 +42,7 @@ const respond = (choice) => () => {
 function workSummary(now) {
   const end = wt.formatClock(wt.endTime(day));
   const total = wt.formatDuration(wt.elapsed(day, now));
+  if (day.waiting) return '좋은 아침이에요!<br>컴퓨터를 쓰기 시작하면 타이머가 켜져요';
   if (day.endedAt) return `${wt.formatClock(day.endedAt)} 퇴근 완료 · 총 ${total} 근무`;
   const left = wt.remaining(day, now);
   if (left > 0) {
@@ -56,10 +59,16 @@ function render() {
   document.body.classList.toggle('ended', !!day.endedAt);
   document.body.classList.toggle('due', due);
 
-  // 이마 LCD: 남은 시간 → 지나면 +초과 시간 → 종료하면 BYE
-  $('lcd').textContent = day.endedAt ? 'BYE' : wt.formatDuration(left);
+  // 이마 LCD: 남은 시간 → 지나면 +초과 시간 → 종료하면 BYE (새 근무일 대기 중엔 --:--)
+  $('lcd').textContent = day.waiting ? '--:--' : day.endedAt ? 'BYE' : wt.formatDuration(left);
 
-  if (due) {
+  if (clockJump) {
+    const sign = clockJump.delta > 0 ? '+' : '-';
+    setBubble(`컴퓨터 시계가 바뀌었어요 (${sign}${overBy(-Math.abs(clockJump.delta))}).<br><strong>퇴근 시각을 다시 계산할까요?</strong>`, [
+      ['다시 계산', () => fairy.respondClock(true), true],
+      ['그대로 두기', () => fairy.respondClock(false)],
+    ]);
+  } else if (due) {
     const title = day.overtime
       ? `추가 근무 ${overBy(left)}째예요.<br><strong>이제 퇴근할까요?</strong>`
       : '<strong>퇴근 시간이에요! 🎉</strong><br>오늘도 수고했어요';
@@ -103,6 +112,7 @@ for (const el of document.querySelectorAll('.hit')) {
 
 // 눈이 마우스 포인터 쪽을 바라봄
 fairy.onCursor(({ x, y }) => {
+  if (!prefs.mouseReact) return;
   const dx = x - 100, dy = y - 160; // 창 안에서 눈 위치
   const dist = Math.hypot(dx, dy) || 1;
   const k = Math.min(2.5, dist / 50) / dist;
@@ -132,6 +142,19 @@ window.addEventListener('mouseup', (e) => {
 
 $('gear').addEventListener('click', () => fairy.openSettings());
 
+function applyPrefs(p) {
+  prefs = p;
+  document.documentElement.style.setProperty('--fairy-opacity', p.opacity);
+  if (!p.mouseReact) {
+    $('eyes').style.transform = '';
+    $('fairy').classList.remove('near');
+  }
+}
+
+fairy.onPrefs(applyPrefs);
+fairy.getPrefs().then(applyPrefs);
+fairy.onClockJump((j) => { clockJump = j; render(); });
+fairy.getClockJump().then((j) => { clockJump = j; render(); });
 fairy.onState((d) => { day = d; render(); });
 fairy.onTodos((t) => { todos = t; render(); });
 fairy.getTodos().then((t) => { todos = t; render(); });

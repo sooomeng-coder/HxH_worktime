@@ -31,6 +31,8 @@ html, body {
   transition: scale 0.25s ease-out;
 }
 #fairy.dragging { cursor: grabbing; animation: none; }
+#fairy { opacity: var(--fairy-opacity, 1); }
+#fairy:hover { opacity: 1; }
 #fairy.near { scale: 1.04; }
 
 @keyframes float {

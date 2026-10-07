@@ -40,6 +40,10 @@
     #todoCount { font-weight: normal; opacity: 0.8; }
     #nudgeRow { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; }
     #nudgeRow select { font: inherit; padding: 2px 4px; }
+    .range { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .range span:first-child { width: 52px; }
+    .range input { flex: 1; }
+    .range output { width: 40px; text-align: right; font-size: 12px; opacity: 0.8; }
     #nudgeOn { border: none; border-radius: 8px; padding: 3px 8px; background: #eef3f7; font: inherit; font-size: 12px; cursor: pointer; }
   </style>
 </head>
@@ -80,6 +84,13 @@
     </select>
     <button id="nudgeOn" hidden>오늘 다시 켜기</button>
   </div>
+
+  <h2>요정 표시</h2>
+  <div class="range"><span>크기</span><input type="range" id="scale" min="70" max="150" step="10"><output id="scaleOut"></output></div>
+  <div class="range"><span>투명도</span><input type="range" id="opacity" min="30" max="100" step="10"><output id="opacityOut"></output></div>
+  <label><input type="checkbox" id="mouseReact"> 마우스를 따라 쳐다보기</label>
+  <label><input type="checkbox" id="hidden"> 요정 숨기기</label>
+  <div class="note">발표·영상 시청 중엔 <b id="shortcut"></b> 로 바로 숨기거나 다시 보이게 할 수 있어요. 트레이(작업 표시줄) 아이콘에서도 할 수 있어요.</div>
 
   <script src="settings.js"></script>
 </body>

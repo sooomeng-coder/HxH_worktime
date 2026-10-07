@@ -15,6 +15,10 @@ function render() {
   if (document.activeElement !== $('manualTime')) $('manualTime').value = wt.formatClock(day.start);
 
   const left = wt.remaining(day, Date.now());
+  if (day.waiting) {
+    $('summary').innerHTML = '<strong>새 근무일 대기 중</strong><br>컴퓨터를 쓰기 시작하면 타이머가 켜져요.<br>바로 시작하려면 위에서 시작 시각을 직접 입력하세요.';
+    return;
+  }
   $('summary').innerHTML =
     `<strong>${wt.formatClock(wt.endTime(day))} 퇴근 예정</strong><br>` +
     `${wt.START_MODES[day.startMode]} ${wt.formatClock(day.start)} 시작 + ` +
@@ -98,6 +102,23 @@ $('todoForm').addEventListener('submit', async (e) => {
 
 $('nudgeFreq').addEventListener('change', () => fairy.setNudgeFreq($('nudgeFreq').value));
 $('nudgeOn').addEventListener('click', () => fairy.turnOnNudge());
+
+// ── 요정 표시 ──
+function renderPrefs(p) {
+  $('scale').value = Math.round(p.scale * 100);
+  $('scaleOut').textContent = `${Math.round(p.scale * 100)}%`;
+  $('opacity').value = Math.round(p.opacity * 100);
+  $('opacityOut').textContent = `${Math.round(p.opacity * 100)}%`;
+  $('mouseReact').checked = p.mouseReact;
+  $('hidden').checked = p.hidden;
+}
+$('scale').addEventListener('change', () => fairy.setPrefs({ scale: $('scale').value / 100 }));
+$('opacity').addEventListener('input', () => fairy.setPrefs({ opacity: $('opacity').value / 100 }));
+$('mouseReact').addEventListener('change', () => fairy.setPrefs({ mouseReact: $('mouseReact').checked }));
+$('hidden').addEventListener('change', () => fairy.setPrefs({ hidden: $('hidden').checked }));
+$('shortcut').textContent = navigator.platform.startsWith('Mac') ? '⌘ + ⌥ + H' : 'Ctrl + Alt + H';
+fairy.onPrefs(renderPrefs);
+fairy.getPrefs().then(renderPrefs);
 
 fairy.onTodos(renderTodos);
 fairy.getTodos().then(renderTodos);
