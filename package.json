@@ -65,6 +65,7 @@
       ],
       "category": "Utility"
     },
-    "afterPack": "build/afterPack.js"
+    "afterPack": "build/afterPack.js",
+    "asar": false
   }
 }
