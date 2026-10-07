@@ -1,8 +1,8 @@
 :root {
-  --pink: #ffb7cf;
-  --lilac: #c9b6ff;
-  --ink: #3b2f4a;
-  --pill-bg: rgba(255, 255, 255, 0.92);
+  --ink: #2b2f36;
+  --line: #dfe6ee;
+  --suit: #a9d5f0;
+  --bubble-bg: rgba(255, 255, 255, 0.96);
 }
 
 html, body {
@@ -15,74 +15,125 @@ html, body {
 
 #stage {
   position: relative;
-  width: 170px;
-  height: 210px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 6px;
-  box-sizing: border-box;
+  width: 200px;
+  height: 270px;
 }
 
+/* ── 요정 ── */
+#fairy {
+  position: absolute;
+  left: 20px;
+  bottom: 4px;
+  width: 160px;
+  height: 170px;
+  cursor: grab;
+  animation: float 3.4s ease-in-out infinite;
+  transition: scale 0.25s ease-out;
+}
+#fairy.dragging { cursor: grabbing; animation: none; }
+#fairy.near { scale: 1.04; }
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+
+.wing circle { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+.wing { transform-origin: 80px 120px; animation: flutter 0.7s ease-in-out infinite alternate; }
+@keyframes flutter { to { transform: scaleX(1.05); } }
+
+.suit { fill: var(--suit); }
+.sole { fill: #9c7b61; }
+.collar { fill: #f6eb9f; }
+.hand { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+.ear { fill: #1f1f22; }
+.head { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+.lcd { fill: #cfe7ee; stroke: #26292e; stroke-width: 3; }
+#lcd {
+  font-family: "DS-Digital", "Consolas", "Menlo", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  fill: #1c2730;
+}
+#eyes { transition: transform 0.15s ease-out; }
+#eyes ellipse { fill: #1f1f22; }
+.glint { fill: #fff; }
+.eye-closed path { fill: none; stroke: #1f1f22; stroke-width: 2.4; stroke-linecap: round; }
+.eye-closed { display: none; }
+.cheek { fill: #b8606c; opacity: 0.85; }
+.mouth { fill: #f19caa; }
+
+/* 퇴근 시각이 지나면 LCD가 깜빡이고 입이 커짐 */
+body.due #lcd { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
+body.due .mouth { d: path("M68 74 Q80 98 92 74 Q80 78 68 74 Z"); }
+
+/* 타이머를 종료하면 눈 감고 쉼 */
+body.ended .eye-open { display: none; }
+body.ended .eye-closed { display: inline; }
+body.ended .mouth { d: path("M75 79 Q80 84 85 79 Q80 80 75 79 Z"); }
+body.ended #fairy { animation-duration: 6s; }
+
+/* ── 설정 버튼 ── */
 #gear {
   position: absolute;
-  top: 6px;
-  right: 34px;
+  top: 96px;
+  right: 14px;
   width: 24px;
   height: 24px;
   border: none;
   border-radius: 50%;
-  background: var(--pill-bg);
+  background: var(--bubble-bg);
   color: var(--ink);
   font-size: 14px;
   line-height: 24px;
   padding: 0;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   opacity: 0;
   transition: opacity 0.2s;
+  z-index: 2;
 }
 #stage:hover #gear { opacity: 1; }
 
-#fairy {
-  cursor: grab;
-  animation: float 3.2s ease-in-out infinite;
-  transition: transform 0.25s ease-out;
-}
-#fairy.dragging { cursor: grabbing; animation: none; }
-#fairy.near { transform: scale(1.06); }
-
-@keyframes float {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -5px; }
-}
-
-.wings ellipse { fill: var(--lilac); opacity: 0.7; }
-.wings { transform-origin: 60px 52px; animation: flutter 0.6s ease-in-out infinite alternate; }
-@keyframes flutter { to { transform: scaleX(0.9); } }
-.dress { fill: var(--pink); }
-.face { fill: #ffe9dc; }
-.hair { fill: #8a5a44; }
-.star { fill: #ffd84d; }
-#pupilL, #pupilR { fill: var(--ink); }
-.cheek { fill: #ff9fb5; opacity: 0.6; }
-.mouth { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
-
-/* 퇴근 시각이 지나면 요정이 신남 */
-body.done .dress { fill: #9be3b5; }
-body.done .mouth { d: path("M54 63 Q60 71 66 63"); }
-
-#pill {
-  margin-top: 2px;
-  min-width: 96px;
-  padding: 4px 10px;
+/* ── 말풍선 ── */
+#bubble {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 176px;
+  padding: 8px 10px;
   border-radius: 12px;
-  background: var(--pill-bg);
+  background: var(--bubble-bg);
   color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
   text-align: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  cursor: default;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
-#remain { font-size: 14px; font-weight: 700; }
-#detail { font-size: 11px; line-height: 1.5; margin-top: 2px; opacity: 0.85; }
+#bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-bottom: 0;
+  border-top-color: var(--bubble-bg);
+}
+#bubbleText strong { font-size: 13px; }
+#bubbleButtons { display: flex; gap: 4px; justify-content: center; margin-top: 6px; }
+#bubbleButtons:empty { display: none; }
+#bubbleButtons button {
+  border: none;
+  border-radius: 8px;
+  padding: 3px 7px;
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #eef3f7;
+  color: var(--ink);
+}
+#bubbleButtons button.primary { background: var(--suit); font-weight: 700; }

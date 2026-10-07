@@ -57,3 +57,33 @@ test('HH:MM 파싱', () => {
   assert.equal(wt.timeOnDay(at(0, 0), '09:15'), at(9, 15));
   assert.ok(Number.isNaN(wt.timeOnDay(at(0, 0), '25:00')));
 });
+
+test('퇴근 예정 시각에 알림, 타이머 종료하면 더 이상 알리지 않음', () => {
+  const day = wt.createDay(at(9, 0), at(9, 0));
+  assert.equal(wt.alertDue(day, at(17, 59)), false);
+  assert.equal(wt.alertDue(day, at(18, 0)), true);
+  const ended = wt.respondAlert(day, 'end', at(18, 2));
+  assert.equal(wt.alertDue(ended, at(20, 0)), false);
+  assert.equal(wt.formatDuration(wt.elapsed(ended, at(20, 0))), '9:02');
+  assert.equal(wt.resume(ended).endedAt, null);
+});
+
+test('추가 근무를 고르면 30분 후 다시 알림', () => {
+  const day = wt.createDay(at(9, 0), at(9, 0));
+  const ot = wt.respondAlert(day, 'overtime', at(18, 1));
+  assert.equal(ot.overtime, true);
+  assert.equal(wt.alertDue(ot, at(18, 30)), false);
+  assert.equal(wt.alertDue(ot, at(18, 31)), true);
+  // 퇴근 예정 시각과 실제 경과시간을 구분
+  assert.equal(wt.formatClock(wt.endTime(ot)), '18:00');
+  assert.equal(wt.formatDuration(wt.elapsed(ot, at(18, 40))), '9:40');
+});
+
+test('알림 숨기기는 오늘 알림을 끄고, 일정이 바뀌면 다시 켜짐', () => {
+  const day = wt.createDay(at(9, 0), at(9, 0));
+  const hidden = wt.respondAlert(day, 'hide', at(18, 0));
+  assert.equal(wt.alertDue(hidden, at(19, 0)), false);
+  const changed = wt.setStart(hidden, 'boot_plus_10', at(19, 0));
+  assert.equal(wt.alertDue(changed, at(18, 9)), false);
+  assert.equal(wt.alertDue(changed, at(18, 10)), true);
+});

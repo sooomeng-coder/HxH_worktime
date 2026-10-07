@@ -41,7 +41,10 @@ function createDay(bootMs, nowMs) {
     workType: 'normal',
     workMinutes: WORK_TYPES.normal.minutes,
     flexMinutes: WORK_TYPES.flex.minutes, // 사용자가 바꾼 유연근무 시간 기억
-    endedAt: null,
+    endedAt: null, // 타이머 종료 시각
+    overtime: false, // 추가 근무 선택 여부
+    nextAlertAt: null, // 다음 퇴근 알림 시각 (null이면 퇴근 예정 시각)
+    alertOff: false, // 오늘 퇴근 알림 숨김
   };
 }
 
@@ -60,9 +63,14 @@ function remaining(day, nowMs) {
   return endTime(day) - nowMs;
 }
 
+// 근무 일정이 바뀌면 퇴근 알림을 새 퇴근 예정 시각 기준으로 다시 잡는다
+function resetAlert(day) {
+  return { ...day, overtime: false, nextAlertAt: null, alertOff: false };
+}
+
 function setWorkType(day, type, flexMinutes) {
   if (!WORK_TYPES[type]) throw new Error(`알 수 없는 근무 유형: ${type}`);
-  const next = { ...day, workType: type };
+  const next = { ...resetAlert(day), workType: type };
   if (type === 'flex') {
     if (flexMinutes != null) {
       if (!Number.isInteger(flexMinutes) || flexMinutes <= 0 || flexMinutes > 24 * 60) {
@@ -87,7 +95,35 @@ function setStart(day, mode, nowMs, manualMs) {
 
   if (!Number.isFinite(start)) throw new Error('시작 시각이 올바르지 않습니다.');
   if (start > nowMs) throw new Error('현재 시각 이후로는 시작 시각을 정할 수 없어요.');
-  return { ...day, startMode: mode, start };
+  return { ...resetAlert(day), startMode: mode, start };
+}
+
+const OVERTIME_REMIND_MINUTES = 30;
+
+// 퇴근 가능 알림을 띄워야 하는지
+function alertDue(day, nowMs) {
+  if (day.endedAt || day.alertOff) return false;
+  return nowMs >= (day.nextAlertAt ?? endTime(day));
+}
+
+// 퇴근 알림 응답: 'end' 타이머 종료 | 'overtime' 추가 근무(30분 후 재알림) | 'hide' 오늘 알림 숨김
+function respondAlert(day, choice, nowMs) {
+  if (choice === 'end') return { ...day, endedAt: nowMs };
+  if (choice === 'overtime') {
+    return { ...day, overtime: true, nextAlertAt: nowMs + OVERTIME_REMIND_MINUTES * MINUTE };
+  }
+  if (choice === 'hide') return { ...day, alertOff: true };
+  throw new Error(`알 수 없는 응답: ${choice}`);
+}
+
+// 실수로 종료했을 때 다시 시작
+function resume(day) {
+  return { ...day, endedAt: null };
+}
+
+// 시작 시각부터 지금(종료했으면 종료 시각)까지 실제 경과시간
+function elapsed(day, nowMs) {
+  return (day.endedAt ?? nowMs) - day.start;
 }
 
 // "HH:MM" → 같은 날짜의 ms
@@ -123,6 +159,10 @@ module.exports = {
   remaining,
   setWorkType,
   setStart,
+  alertDue,
+  respondAlert,
+  resume,
+  elapsed,
   timeOnDay,
   formatClock,
   formatDuration,

@@ -4,7 +4,7 @@ const path = require('path');
 const store = require('./store');
 const wt = require('./core/worktime');
 
-const FAIRY_SIZE = { width: 170, height: 210 };
+const FAIRY_SIZE = { width: 200, height: 270 };
 
 let state; // { day, widget: { x, y } }
 let fairyWin = null;
@@ -132,6 +132,9 @@ function registerIpc() {
     update((day) => wt.setWorkType(day, type, flexMinutes)));
   ipcMain.handle('day:setStart', (_e, mode, manualMs) =>
     update((day) => wt.setStart(day, mode, Date.now(), manualMs)));
+  ipcMain.handle('alert:respond', (_e, choice) =>
+    update((day) => wt.respondAlert(day, choice, Date.now())));
+  ipcMain.handle('day:resume', () => update(wt.resume));
   ipcMain.handle('boot:get', () => bootTime());
 
   ipcMain.on('settings:open', openSettings);
