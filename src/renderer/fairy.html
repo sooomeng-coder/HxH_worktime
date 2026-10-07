@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>퇴근 요정</title>
+  <link rel="stylesheet" href="fairy.css">
+</head>
+<body>
+  <div id="stage">
+    <button id="gear" class="hit" title="설정">⚙</button>
+
+    <div id="fairy" class="hit" title="클릭: 자세히 보기 · 드래그: 이동">
+      <svg viewBox="0 0 120 120" width="104" height="104" aria-hidden="true">
+        <!-- 날개 -->
+        <g class="wings">
+          <ellipse cx="30" cy="52" rx="22" ry="14" transform="rotate(-25 30 52)" />
+          <ellipse cx="90" cy="52" rx="22" ry="14" transform="rotate(25 90 52)" />
+        </g>
+        <!-- 몸 -->
+        <path class="dress" d="M42 78 Q60 62 78 78 L84 104 Q60 112 36 104 Z" />
+        <!-- 머리 -->
+        <circle class="face" cx="60" cy="50" r="26" />
+        <path class="hair" d="M34 48 Q36 22 60 22 Q84 22 86 48 Q76 34 60 36 Q44 34 34 48 Z" />
+        <circle class="star" cx="80" cy="26" r="4" />
+        <!-- 눈 -->
+        <g class="eye"><circle cx="50" cy="52" r="6" fill="#fff" /><circle id="pupilL" cx="50" cy="52" r="3.2" /></g>
+        <g class="eye"><circle cx="70" cy="52" r="6" fill="#fff" /><circle id="pupilR" cx="70" cy="52" r="3.2" /></g>
+        <ellipse class="cheek" cx="42" cy="62" rx="4" ry="2.5" />
+        <ellipse class="cheek" cx="78" cy="62" rx="4" ry="2.5" />
+        <path class="mouth" d="M55 64 Q60 69 65 64" />
+      </svg>
+    </div>
+
+    <div id="pill" class="hit">
+      <div id="remain">--:--</div>
+      <div id="detail" hidden></div>
+    </div>
+  </div>
+  <script src="fairy.js"></script>
+</body>
+</html>

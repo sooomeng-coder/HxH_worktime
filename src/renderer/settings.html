@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>퇴근 요정 설정</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-size: 14px;
+      color: #3b2f4a;
+      background: #fff8fb;
+    }
+    h2 { font-size: 13px; margin: 18px 0 8px; color: #8a6fa8; }
+    h2:first-child { margin-top: 0; }
+    label { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    input[type="number"] { width: 52px; }
+    #summary {
+      margin-top: 18px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      line-height: 1.6;
+    }
+    #summary strong { font-size: 16px; }
+    #error { color: #d6336c; min-height: 18px; margin-top: 6px; font-size: 12px; }
+    .note { font-size: 11px; opacity: 0.7; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h2>오늘의 근무 유형</h2>
+  <label><input type="radio" name="type" value="normal"> 일반근무 (9시간)</label>
+  <label><input type="radio" name="type" value="half"> 반차 (4시간)</label>
+  <label>
+    <input type="radio" name="type" value="flex"> 유연근무
+    <input type="number" id="flexH" min="0" max="23"> 시간
+    <input type="number" id="flexM" min="0" max="59" step="5"> 분
+  </label>
+
+  <h2>업무 시작 시각</h2>
+  <label><input type="radio" name="start" value="boot"> 부팅 시각 <span id="bootLabel"></span></label>
+  <label><input type="radio" name="start" value="boot_plus_10"> 부팅 10분 후 <span id="boot10Label"></span></label>
+  <label><input type="radio" name="start" value="manual"> 직접 입력 <input type="time" id="manualTime"></label>
+  <div id="error"></div>
+
+  <div id="summary"></div>
+  <div class="note">계산 결과는 개인 참고용이며, 회사의 공식 근태 기록과 다를 수 있어요.</div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

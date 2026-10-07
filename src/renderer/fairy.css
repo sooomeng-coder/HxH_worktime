@@ -1,0 +1,88 @@
+:root {
+  --pink: #ffb7cf;
+  --lilac: #c9b6ff;
+  --ink: #3b2f4a;
+  --pill-bg: rgba(255, 255, 255, 0.92);
+}
+
+html, body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+#stage {
+  position: relative;
+  width: 170px;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 6px;
+  box-sizing: border-box;
+}
+
+#gear {
+  position: absolute;
+  top: 6px;
+  right: 34px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: var(--pill-bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 24px;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#stage:hover #gear { opacity: 1; }
+
+#fairy {
+  cursor: grab;
+  animation: float 3.2s ease-in-out infinite;
+  transition: transform 0.25s ease-out;
+}
+#fairy.dragging { cursor: grabbing; animation: none; }
+#fairy.near { transform: scale(1.06); }
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+.wings ellipse { fill: var(--lilac); opacity: 0.7; }
+.wings { transform-origin: 60px 52px; animation: flutter 0.6s ease-in-out infinite alternate; }
+@keyframes flutter { to { transform: scaleX(0.9); } }
+.dress { fill: var(--pink); }
+.face { fill: #ffe9dc; }
+.hair { fill: #8a5a44; }
+.star { fill: #ffd84d; }
+#pupilL, #pupilR { fill: var(--ink); }
+.cheek { fill: #ff9fb5; opacity: 0.6; }
+.mouth { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+
+/* 퇴근 시각이 지나면 요정이 신남 */
+body.done .dress { fill: #9be3b5; }
+body.done .mouth { d: path("M54 63 Q60 71 66 63"); }
+
+#pill {
+  margin-top: 2px;
+  min-width: 96px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  cursor: default;
+}
+#remain { font-size: 14px; font-weight: 700; }
+#detail { font-size: 11px; line-height: 1.5; margin-top: 2px; opacity: 0.85; }
