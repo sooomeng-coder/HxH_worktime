@@ -10,9 +10,9 @@ function init(dir) {
 
 function load() {
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    return { todos: [], ...JSON.parse(fs.readFileSync(file, 'utf8')) };
   } catch {
-    return { day: null, widget: null };
+    return { day: null, todos: [], widget: null };
   }
 }
 

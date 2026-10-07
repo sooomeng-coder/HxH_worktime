@@ -63,3 +63,36 @@ $('manualTime').addEventListener('change', () => {
 fairy.onState((d) => { day = d; render(); });
 fairy.getState().then((d) => { day = d; render(); });
 setInterval(() => day && render(), 30000);
+
+// ── 오늘의 할 일 ──
+function renderTodos({ list }) {
+  const done = list.filter((t) => t.done).length;
+  $('todoCount').textContent = list.length ? `(${done}/${list.length} 완료)` : '';
+  $('todoEmpty').hidden = list.length > 0;
+  $('todoList').replaceChildren(...list.map((t) => {
+    const li = document.createElement('li');
+    li.className = t.done ? 'done' : '';
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = t.done;
+    box.addEventListener('change', () => fairy.toggleTodo(t.id));
+    const text = document.createElement('span');
+    text.textContent = t.text;
+    const del = document.createElement('button');
+    del.textContent = '✕';
+    del.title = '삭제';
+    del.addEventListener('click', () => fairy.removeTodo(t.id));
+    li.append(box, text, del);
+    return li;
+  }));
+}
+
+$('todoForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const res = await fairy.addTodo($('todoInput').value);
+  $('todoError').textContent = res.ok ? '' : res.error;
+  if (res.ok) $('todoInput').value = '';
+});
+
+fairy.onTodos(renderTodos);
+fairy.getTodos().then(renderTodos);

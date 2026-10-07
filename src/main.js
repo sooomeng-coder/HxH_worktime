@@ -3,10 +3,11 @@ const os = require('os');
 const path = require('path');
 const store = require('./store');
 const wt = require('./core/worktime');
+const td = require('./core/todos');
 
 const FAIRY_SIZE = { width: 200, height: 270 };
 
-let state; // { day, widget: { x, y } }
+let state; // { day, todos, widget: { x, y } }
 let fairyWin = null;
 let settingsWin = null;
 let dragOffset = null;
@@ -19,11 +20,26 @@ function refreshDay() {
     state.day = day;
     store.save(state);
   }
+  // 지난 할 일 중 못 끝낸 게 없으면 묻지 않고 정리 (있으면 요정이 가져올지 물어봄)
+  const today = state.day.date;
+  if (!td.leftovers(state.todos, today).length && state.todos.some((t) => t.date !== today)) {
+    state.todos = td.startNewDay(state.todos, today, false);
+    store.save(state);
+  }
+}
+
+function todosView() {
+  return {
+    list: td.todayTodos(state.todos, state.day.date),
+    leftovers: td.leftovers(state.todos, state.day.date),
+  };
 }
 
 function broadcast() {
   for (const win of [fairyWin, settingsWin]) {
-    if (win && !win.isDestroyed()) win.webContents.send('state:changed', state.day);
+    if (!win || win.isDestroyed()) continue;
+    win.webContents.send('state:changed', state.day);
+    win.webContents.send('todos:changed', todosView());
   }
 }
 
@@ -85,7 +101,7 @@ function openSettings() {
   }
   settingsWin = new BrowserWindow({
     width: 320,
-    height: 460,
+    height: 640,
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -123,6 +139,17 @@ function update(fn) {
   }
 }
 
+function updateTodos(fn) {
+  try {
+    state.todos = fn(state.todos);
+    store.save(state);
+    broadcast();
+    return { ok: true, todos: todosView() };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
 function registerIpc() {
   ipcMain.handle('state:get', () => {
     refreshDay();
@@ -136,6 +163,17 @@ function registerIpc() {
     update((day) => wt.respondAlert(day, choice, Date.now())));
   ipcMain.handle('day:resume', () => update(wt.resume));
   ipcMain.handle('boot:get', () => bootTime());
+
+  ipcMain.handle('todos:get', () => {
+    refreshDay();
+    return todosView();
+  });
+  ipcMain.handle('todos:add', (_e, text) =>
+    updateTodos((list) => td.addTodo(list, text, state.day.date, Date.now())));
+  ipcMain.handle('todos:toggle', (_e, id) => updateTodos((list) => td.toggleTodo(list, id)));
+  ipcMain.handle('todos:remove', (_e, id) => updateTodos((list) => td.removeTodo(list, id)));
+  ipcMain.handle('todos:carry', (_e, carry) =>
+    updateTodos((list) => td.startNewDay(list, state.day.date, !!carry)));
 
   ipcMain.on('settings:open', openSettings);
   ipcMain.on('mouse:ignore', (_e, ignore) => {

@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let day = null;
+let todos = { list: [], leftovers: [] };
 let detailOpen = false;
 let bubbleKey = '';
 
@@ -64,9 +65,17 @@ function render() {
       ['30분 더', respond('overtime')],
       ['숨기기', respond('hide')],
     ]);
+  } else if (todos.leftovers.length) {
+    // 새 근무일: 지난번에 못 끝낸 할 일을 오늘로 가져올지 물어봄
+    setBubble(`지난번에 못 끝낸 할 일이 <strong>${todos.leftovers.length}개</strong> 있어요.<br>오늘로 가져올까요?`, [
+      ['가져오기', () => fairy.carryTodos(true), true],
+      ['새로 시작', () => fairy.carryTodos(false)],
+    ]);
   } else if (detailOpen) {
+    const doneCount = todos.list.filter((t) => t.done).length;
+    const todoLine = todos.list.length ? `<br>할 일 ${doneCount}/${todos.list.length} 완료` : '';
     setBubble(
-      `${workSummary(now)}<br><span style="opacity:.6">개인 참고용 계산이에요</span>`,
+      `${workSummary(now)}${todoLine}<br><span style="opacity:.6">개인 참고용 계산이에요</span>`,
       day.endedAt ? [['다시 시작', () => fairy.resume(), true]] : [],
     );
   } else if (!$('bubble').hidden) {
@@ -112,5 +121,7 @@ window.addEventListener('mouseup', (e) => {
 $('gear').addEventListener('click', () => fairy.openSettings());
 
 fairy.onState((d) => { day = d; render(); });
+fairy.onTodos((t) => { todos = t; render(); });
+fairy.getTodos().then((t) => { todos = t; render(); });
 fairy.getState().then((d) => { day = d; render(); });
 setInterval(render, 1000);
