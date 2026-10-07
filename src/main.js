@@ -4,10 +4,11 @@ const path = require('path');
 const store = require('./store');
 const wt = require('./core/worktime');
 const td = require('./core/todos');
+const ng = require('./core/nudge');
 
-const FAIRY_SIZE = { width: 200, height: 270 };
+const FAIRY_SIZE = { width: 200, height: 300 };
 
-let state; // { day, todos, widget: { x, y } }
+let state; // { day, todos, nudge, widget: { x, y } }
 let fairyWin = null;
 let settingsWin = null;
 let dragOffset = null;
@@ -29,10 +30,40 @@ function refreshDay() {
 }
 
 function todosView() {
+  const today = state.day.date;
+  const list = td.todayTodos(state.todos, today);
+  const { freq, offDate, todoId } = state.nudge;
   return {
-    list: td.todayTodos(state.todos, state.day.date),
-    leftovers: td.leftovers(state.todos, state.day.date),
+    list,
+    leftovers: td.leftovers(state.todos, today),
+    nudge: {
+      freq,
+      offToday: offDate === today,
+      todo: list.find((t) => t.id === todoId && !t.done) ?? null,
+    },
   };
+}
+
+// 할 일 확인 말풍선을 띄울 때인지 확인 (퇴근 후나 이월 질문 중에는 쉼)
+function nudgeTick() {
+  const today = state.day.date;
+  if (state.day.endedAt || td.leftovers(state.todos, today).length) return;
+  const next = ng.tick(state.nudge, td.todayTodos(state.todos, today), today, Date.now());
+  if (JSON.stringify(next) === JSON.stringify(state.nudge)) return;
+  state.nudge = next;
+  store.save(state);
+  broadcast();
+}
+
+function updateNudge(fn) {
+  try {
+    state.nudge = fn(state.nudge);
+    store.save(state);
+    broadcast();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
 }
 
 function broadcast() {
@@ -101,8 +132,8 @@ function openSettings() {
   }
   settingsWin = new BrowserWindow({
     width: 320,
-    height: 640,
-    resizable: false,
+    height: 700,
+    resizable: true,
     minimizable: false,
     maximizable: false,
     alwaysOnTop: true,
@@ -175,6 +206,16 @@ function registerIpc() {
   ipcMain.handle('todos:carry', (_e, carry) =>
     updateTodos((list) => td.startNewDay(list, state.day.date, !!carry)));
 
+  ipcMain.handle('nudge:respond', (_e, choice) => {
+    const id = state.nudge.todoId;
+    if (choice === 'done' && id) {
+      state.todos = state.todos.map((t) => (t.id === id ? { ...t, done: true } : t));
+    }
+    return updateNudge((n) => ng.respond(n, choice, state.day.date, Date.now()));
+  });
+  ipcMain.handle('nudge:setFreq', (_e, freq) => updateNudge((n) => ng.setFreq(n, freq, Date.now())));
+  ipcMain.handle('nudge:turnOn', () => updateNudge((n) => ng.turnOnToday(n, Date.now())));
+
   ipcMain.on('settings:open', openSettings);
   ipcMain.on('mouse:ignore', (_e, ignore) => {
     if (fairyWin && !dragOffset) fairyWin.setIgnoreMouseEvents(ignore, { forward: true });
@@ -210,6 +251,8 @@ if (!app.requestSingleInstanceLock()) {
     registerIpc();
     createFairyWindow();
     startCursorFeed();
+    nudgeTick();
+    setInterval(nudgeTick, 30 * 1000);
 
     // 절전 복귀·잠금 해제 시 날짜 확인 후 화면 갱신
     for (const ev of ['resume', 'unlock-screen']) {

@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let day = null;
-let todos = { list: [], leftovers: [] };
+let todos = { list: [], leftovers: [], nudge: { todo: null } };
 let detailOpen = false;
 let bubbleKey = '';
 
@@ -25,6 +25,9 @@ function hideBubble() {
   bubbleKey = '';
   fairy.ignoreMouse(true);
 }
+
+// 사용자가 쓴 할 일 문구를 말풍선(innerHTML)에 넣기 전에 이스케이프
+const esc = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 // 지난 시간을 LCD와 같은 방식으로 표시 ("+0:07" → "0:07")
 const overBy = (left) => wt.formatDuration(left).replace('+', '');
@@ -70,6 +73,15 @@ function render() {
     setBubble(`지난번에 못 끝낸 할 일이 <strong>${todos.leftovers.length}개</strong> 있어요.<br>오늘로 가져올까요?`, [
       ['가져오기', () => fairy.carryTodos(true), true],
       ['새로 시작', () => fairy.carryTodos(false)],
+    ]);
+  } else if (todos.nudge.todo) {
+    // 무작위로 고른 미완료 할 일을 가볍게 물어봄
+    const respondNudge = (choice) => () => fairy.respondNudge(choice);
+    setBubble(`이 일은 했나요?<br><strong>${esc(todos.nudge.todo.text)}</strong>`, [
+      ['완료', respondNudge('done'), true],
+      ['나중에', respondNudge('later')],
+      ['숨기기', respondNudge('hide')],
+      ['오늘 끄기', respondNudge('off')],
     ]);
   } else if (detailOpen) {
     const doneCount = todos.list.filter((t) => t.done).length;

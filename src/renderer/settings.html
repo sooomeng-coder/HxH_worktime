@@ -15,8 +15,8 @@
     }
     h2 { font-size: 13px; margin: 18px 0 8px; color: #8a6fa8; }
     h2:first-child { margin-top: 0; }
-    label { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
-    input[type="number"] { width: 52px; }
+    label { display: flex; align-items: center; gap: 8px; padding: 4px 0; white-space: nowrap; }
+    input[type="number"] { width: 44px; }
     #summary {
       margin-top: 18px;
       padding: 10px 12px;
@@ -38,6 +38,9 @@
     #todoList li button { border: none; background: none; color: #b9a6c9; cursor: pointer; font-size: 13px; }
     #todoEmpty { font-size: 12px; opacity: 0.6; margin-top: 8px; }
     #todoCount { font-weight: normal; opacity: 0.8; }
+    #nudgeRow { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; }
+    #nudgeRow select { font: inherit; padding: 2px 4px; }
+    #nudgeOn { border: none; border-radius: 8px; padding: 3px 8px; background: #eef3f7; font: inherit; font-size: 12px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -67,6 +70,16 @@
   <div id="todoError" class="error"></div>
   <ul id="todoList"></ul>
   <div id="todoEmpty">할 일 없이 타이머만 써도 괜찮아요.</div>
+  <div id="nudgeRow">
+    요정이 가끔 물어보기
+    <select id="nudgeFreq">
+      <option value="off">끄기</option>
+      <option value="low">낮음 (2~3시간)</option>
+      <option value="normal">보통 (1.5~2시간)</option>
+      <option value="high">높음 (1~1.5시간)</option>
+    </select>
+    <button id="nudgeOn" hidden>오늘 다시 켜기</button>
+  </div>
 
   <script src="settings.js"></script>
 </body>

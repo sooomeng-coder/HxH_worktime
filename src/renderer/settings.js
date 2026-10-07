@@ -65,7 +65,9 @@ fairy.getState().then((d) => { day = d; render(); });
 setInterval(() => day && render(), 30000);
 
 // ── 오늘의 할 일 ──
-function renderTodos({ list }) {
+function renderTodos({ list, nudge }) {
+  $('nudgeFreq').value = nudge.freq;
+  $('nudgeOn').hidden = !(nudge.offToday && nudge.freq !== 'off');
   const done = list.filter((t) => t.done).length;
   $('todoCount').textContent = list.length ? `(${done}/${list.length} 완료)` : '';
   $('todoEmpty').hidden = list.length > 0;
@@ -93,6 +95,9 @@ $('todoForm').addEventListener('submit', async (e) => {
   $('todoError').textContent = res.ok ? '' : res.error;
   if (res.ok) $('todoInput').value = '';
 });
+
+$('nudgeFreq').addEventListener('change', () => fairy.setNudgeFreq($('nudgeFreq').value));
+$('nudgeOn').addEventListener('click', () => fairy.turnOnNudge());
 
 fairy.onTodos(renderTodos);
 fairy.getTodos().then(renderTodos);

@@ -1,6 +1,7 @@
 // 상태를 사용자 컴퓨터의 JSON 파일 하나에 저장 (서버·로그인 없음)
 const fs = require('fs');
 const path = require('path');
+const { createNudge } = require('./core/nudge');
 
 let file;
 
@@ -10,9 +11,9 @@ function init(dir) {
 
 function load() {
   try {
-    return { todos: [], ...JSON.parse(fs.readFileSync(file, 'utf8')) };
+    return { todos: [], nudge: createNudge(), ...JSON.parse(fs.readFileSync(file, 'utf8')) };
   } catch {
-    return { day: null, todos: [], widget: null };
+    return { day: null, todos: [], nudge: createNudge(), widget: null };
   }
 }
 
