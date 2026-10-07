@@ -9,7 +9,7 @@
     "test": "node --test test/*.test.js",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac"
+    "dist:mac": "scripts/pack-mac.sh"
   },
   "devDependencies": {
     "electron": "^40.10.6",
@@ -44,27 +44,11 @@
       "perMachine": false,
       "shortcutName": "퇴근 요정"
     },
-    "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        }
-      ],
-      "category": "public.app-category.productivity",
-      "extendInfo": {
-        "LSUIElement": true
-      }
-    },
     "linux": {
       "target": [
         "AppImage"
       ],
       "category": "Utility"
-    },
-    "afterPack": "build/afterPack.js"
+    }
   }
 }

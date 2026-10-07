@@ -21,38 +21,6 @@ run_for() { # $1=라벨, 나머지=명령. 10초 버티면 0
 if run_for packaged "$BIN" --enable-logging=stderr; then exit 0; fi
 
 if [ "$(uname)" = "Darwin" ]; then
-  APP="$(cd "$(dirname "$BIN")/../.." && pwd)"
-  STOCK="$PWD/node_modules/electron/dist/Electron.app"
-  EXE="$(basename "$BIN")"
-  W=/tmp/fairy-bisect; rm -rf "$W"; mkdir -p "$W"
-  resign() { codesign --force --deep --sign - "$1" >/dev/null 2>&1 || echo "(서명 실패: $1)"; }
-  echo "── 진단 A: 원본 Electron.app 안에 앱 코드만 넣어 실행"
-  cp -R "$STOCK" "$W/A.app"; rm -f "$W/A.app/Contents/Resources/default_app.asar"
-  mkdir -p "$W/A.app/Contents/Resources/app" && cp -R src assets package.json "$W/A.app/Contents/Resources/app/"
-  resign "$W/A.app"
-  run_for A-stock-plus-app "$W/A.app/Contents/MacOS/Electron" || true
-  echo "── 진단 B: A + 패키징 앱의 Info.plist (실행 파일 이름만 Electron으로)"
-  cp -R "$W/A.app" "$W/B.app"; cp "$APP/Contents/Info.plist" "$W/B.app/Contents/Info.plist"
-  /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Electron" "$W/B.app/Contents/Info.plist"
-  /usr/libexec/PlistBuddy -c "Delete :ElectronAsarIntegrity" "$W/B.app/Contents/Info.plist" 2>/dev/null
-  resign "$W/B.app"
-  run_for B-plus-plist "$W/B.app/Contents/MacOS/Electron" || true
-  echo "── 진단 C: 패키징 앱 + 원본 Electron Framework"
-  cp -R "$APP" "$W/C.app"; rm -rf "$W/C.app/Contents/Frameworks/Electron Framework.framework"
-  cp -R "$STOCK/Contents/Frameworks/Electron Framework.framework" "$W/C.app/Contents/Frameworks/"
-  resign "$W/C.app"
-  run_for C-stock-framework "$W/C.app/Contents/MacOS/$EXE" || true
-  echo "── 진단 D: 패키징 앱 + 원본 실행 파일"
-  cp -R "$APP" "$W/D.app"; cp "$STOCK/Contents/MacOS/Electron" "$W/D.app/Contents/MacOS/$EXE"
-  resign "$W/D.app"
-  run_for D-stock-exe "$W/D.app/Contents/MacOS/$EXE" || true
-  echo "── 진단: 바이너리 비교 (같으면 해시 동일)"
-  shasum "$STOCK/Contents/MacOS/Electron" "$BIN"
-  shasum "$STOCK/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework" "$APP/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework"
-  echo "── 진단: Info.plist 차이"
-  diff <(plutil -convert xml1 -o - "$STOCK/Contents/Info.plist") <(plutil -convert xml1 -o - "$APP/Contents/Info.plist") | head -80
-  echo "── 진단: Resources 목록"
-  ls -la "$APP/Contents/Resources" | head -30
   echo "── 진단: 코드 서명"
   codesign -dvvv "$BIN" 2>&1 | head -20
   echo "── 진단: 충돌 보고서(멈춘 스레드)"

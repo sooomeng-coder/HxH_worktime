@@ -14,11 +14,12 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            target: --win
+            pack: npx electron-builder --win --publish never
             # 설치 전 실행 파일로 실제 실행 확인
             smoke: dist/win-unpacked/*.exe
           - os: macos-latest # Apple 실리콘(M칩) 러너
-            target: --mac
+            # electron-builder로 포장한 Mac 앱은 시작 직후 꺼져서 직접 포장 (scripts/pack-mac.sh 참고)
+            pack: scripts/pack-mac.sh
             smoke: dist/mac-arm64/*.app/Contents/MacOS/*
     runs-on: ${{ matrix.os }}
     steps:
@@ -29,7 +30,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npx electron-builder ${{ matrix.target }} --publish never
+      - run: ${{ matrix.pack }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false # 코드 서명 없이 빌드
       # 만든 앱이 켜지자마자 꺼지지 않는지 10초간 실행해 확인 (실패 시 원인 정보 출력)
