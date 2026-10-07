@@ -1,6 +1,6 @@
-// 요정 표시 설정 (크기·투명도·마우스 반응·숨기기)
+// 요정 표시 설정 (크기·투명도·마우스 반응·숨기기·자동 실행)
 
-const DEFAULT_PREFS = { scale: 1, opacity: 1, mouseReact: true, hidden: false };
+const DEFAULT_PREFS = { scale: 1, opacity: 1, mouseReact: true, hidden: false, autoStart: true };
 
 const clamp = (v, min, max, fallback) =>
   (Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback);
@@ -12,6 +12,7 @@ function normalizePrefs(p = {}) {
     opacity: Math.round(clamp(Number(p.opacity), 0.3, 1, DEFAULT_PREFS.opacity) * 100) / 100,
     mouseReact: p.mouseReact ?? DEFAULT_PREFS.mouseReact,
     hidden: !!p.hidden,
+    autoStart: p.autoStart ?? DEFAULT_PREFS.autoStart,
   };
 }
 

@@ -20,6 +20,8 @@
 ## 명령
 - `npm start` — 앱 실행
 - `npm test` — `node --test`로 core 로직 테스트
+- `npm run dist:win` / `npm run dist:mac` — 설치 파일 생성(`dist/`). 아이콘 원본은 `build/icon.png`(1024px)
+- `.github/workflows/build.yml` — GitHub Actions에서 Windows·Mac 설치 파일 빌드
 
 ## 원칙
 - 요정은 업무를 방해하지 않는다: 포커스를 뺏지 않고(`showInactive`), 투명 영역은 클릭 통과, 다른 창을 활성화하지 않는다.

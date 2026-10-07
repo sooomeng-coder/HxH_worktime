@@ -99,11 +99,13 @@ function renderPrefs(p) {
   $('opacityOut').textContent = `${Math.round(p.opacity * 100)}%`;
   $('mouseReact').checked = p.mouseReact;
   $('hidden').checked = p.hidden;
+  $('autoStart').checked = p.autoStart;
 }
 $('scale').addEventListener('change', () => fairy.setPrefs({ scale: $('scale').value / 100 }));
 $('opacity').addEventListener('input', () => fairy.setPrefs({ opacity: $('opacity').value / 100 }));
 $('mouseReact').addEventListener('change', () => fairy.setPrefs({ mouseReact: $('mouseReact').checked }));
 $('hidden').addEventListener('change', () => fairy.setPrefs({ hidden: $('hidden').checked }));
+$('autoStart').addEventListener('change', () => fairy.setPrefs({ autoStart: $('autoStart').checked }));
 $('nudgeFreq').addEventListener('change', () => fairy.setNudgeFreq($('nudgeFreq').value));
 $('nudgeOn').addEventListener('click', () => fairy.turnOnNudge());
 $('shortcut').textContent = navigator.platform.startsWith('Mac') ? '⌘⌥H' : 'Ctrl+Alt+H';

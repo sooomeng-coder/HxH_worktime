@@ -107,6 +107,10 @@ function applyPrefs() {
   fairyWin.setBounds({ x, y, width, height });
   fairyWin.setResizable(false);
   fairyWin.webContents.setZoomFactor(scale);
+  // 설치된 앱만 로그인 시 자동 실행 설정 (부팅 시각 기준 계산을 위해 기본 켜짐)
+  if (app.isPackaged && app.getLoginItemSettings().openAtLogin !== state.prefs.autoStart) {
+    app.setLoginItemSettings({ openAtLogin: state.prefs.autoStart });
+  }
   if (hidden && fairyWin.isVisible()) fairyWin.hide();
   if (!hidden && !fairyWin.isVisible()) fairyWin.showInactive();
 }
@@ -365,8 +369,6 @@ if (!app.requestSingleInstanceLock()) {
     state.prefs = normalizePrefs(state.prefs);
     refreshDay(true);
 
-    // 설치된 앱은 로그인 시 자동 실행 (부팅 시각 기준 계산을 위해)
-    if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: true });
 
     registerIpc();
     createFairyWindow();
