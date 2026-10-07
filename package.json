@@ -65,6 +65,6 @@
       ],
       "category": "Utility"
     },
-    "executableName": "toegeun-yojeong"
+    "afterPack": "build/afterPack.js"
   }
 }

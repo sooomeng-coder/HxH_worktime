@@ -49,6 +49,7 @@ jobs:
             wait $PID; CODE=$?
             echo "❌ 앱이 바로 종료됨 (종료 코드 $CODE)"
             cat smoke.log
+            if command -v codesign >/dev/null; then codesign -dvvv "$BIN" 2>&1 | head -20; fi
             # Mac이면 충돌 보고서 앞부분도 출력
             R=$(ls -t ~/Library/Logs/DiagnosticReports/*.ips 2>/dev/null | head -1 || true)
             if [ -n "$R" ]; then head -c 6000 "$R"; fi
