@@ -17,46 +17,21 @@
     <button id="gear" class="hit" title="설정">⚙</button>
 
     <div id="fairy" class="hit" title="클릭: 자세히 보기 · 드래그: 이동">
-      <svg viewBox="0 0 160 170" width="160" height="170" aria-hidden="true">
-        <!-- 날개 -->
-        <g class="wing">
-          <circle cx="24" cy="108" r="13" /><circle cx="14" cy="122" r="12" /><circle cx="22" cy="136" r="11" />
-          <circle cx="136" cy="108" r="13" /><circle cx="146" cy="122" r="12" /><circle cx="138" cy="136" r="11" />
-        </g>
-        <!-- 다리와 신발 -->
-        <ellipse class="suit" cx="46" cy="150" rx="22" ry="14" />
-        <ellipse class="suit" cx="114" cy="150" rx="22" ry="14" />
-        <ellipse class="sole" cx="34" cy="156" rx="12" ry="11" />
-        <ellipse class="sole" cx="126" cy="156" rx="12" ry="11" />
-        <!-- 멜빵바지 몸통 -->
-        <rect class="suit" x="36" y="96" width="88" height="58" rx="26" />
-        <ellipse class="collar" cx="80" cy="101" rx="30" ry="7" />
-        <!-- 손 -->
-        <ellipse class="hand" cx="62" cy="118" rx="14" ry="10" />
-        <ellipse class="hand" cx="98" cy="118" rx="14" ry="10" />
-        <!-- 귀 -->
-        <circle class="ear" cx="32" cy="34" r="18" />
-        <circle class="ear" cx="128" cy="34" r="18" />
-        <!-- 머리와 뿔 -->
-        <path class="head" d="M73 22 Q80 2 87 22 Z" />
-        <ellipse class="head" cx="80" cy="60" rx="58" ry="44" />
+      <!-- 요정 그림(assets/fairy.png, 원본 좌표 516×800) 위에 LCD 글자와 눈을 덧그림 -->
+      <svg viewBox="0 0 516 800" width="110" height="170" aria-hidden="true">
+        <image href="../../assets/fairy.png" x="0" y="0" width="516" height="800" />
         <!-- 이마 LCD 타이머 -->
-        <rect class="lcd" x="47" y="24" width="66" height="26" rx="3" />
-        <text id="lcd" x="80" y="43.5" text-anchor="middle">--:--</text>
-        <!-- 눈 -->
+        <text id="lcd" x="257" y="222" text-anchor="middle">--:--</text>
+        <!-- 눈: 마우스를 따라 움직임, 타이머 종료 시 감음 -->
         <g id="eyes">
           <g class="eye-open">
-            <ellipse cx="62" cy="64" rx="3.4" ry="4.6" /><circle class="glint" cx="63" cy="62.5" r="1.1" />
-            <ellipse cx="98" cy="64" rx="3.4" ry="4.6" /><circle class="glint" cx="99" cy="62.5" r="1.1" />
+            <ellipse cx="146" cy="302" rx="9" ry="16" /><circle class="glint" cx="149" cy="295" r="3.5" />
+            <ellipse cx="369" cy="303" rx="9" ry="16" /><circle class="glint" cx="372" cy="296" r="3.5" />
           </g>
           <g class="eye-closed">
-            <path d="M57 65 Q62 69 67 65" /><path d="M93 65 Q98 69 103 65" />
+            <path d="M131 304 Q146 316 161 304" /><path d="M354 305 Q369 317 384 305" />
           </g>
         </g>
-        <!-- 볼과 입 -->
-        <circle class="cheek" cx="47" cy="79" r="10" />
-        <circle class="cheek" cx="113" cy="79" r="10" />
-        <path id="mouth" class="mouth" d="M71 75 Q80 92 89 75 Q80 78 71 75 Z" />
       </svg>
     </div>
   </div>

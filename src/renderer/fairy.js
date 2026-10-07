@@ -60,7 +60,9 @@ function render() {
   document.body.classList.toggle('due', due);
 
   // 이마 LCD: 남은 시간 → 지나면 +초과 시간 → 종료하면 BYE (새 근무일 대기 중엔 --:--)
-  $('lcd').textContent = day.waiting ? '--:--' : day.endedAt ? 'BYE' : wt.formatDuration(left);
+  const lcd = day.waiting ? '--:--' : day.endedAt ? 'BYE' : wt.formatDuration(left);
+  $('lcd').textContent = lcd;
+  $('lcd').style.fontSize = lcd.length > 5 ? '48px' : ''; // +10:00처럼 긴 값도 화면 안에
 
   if (clockJump) {
     const sign = clockJump.delta > 0 ? '+' : '-';
@@ -113,9 +115,9 @@ for (const el of document.querySelectorAll('.hit')) {
 // 눈이 마우스 포인터 쪽을 바라봄
 fairy.onCursor(({ x, y }) => {
   if (!prefs.mouseReact) return;
-  const dx = x - 100, dy = y - 160; // 창 안에서 눈 위치
+  const dx = x - 100, dy = y - 190; // 창 안에서 눈 위치
   const dist = Math.hypot(dx, dy) || 1;
-  const k = Math.min(2.5, dist / 50) / dist;
+  const k = Math.min(7, dist / 20) / dist; // 그림 좌표(516×800) 기준 최대 7
   $('eyes').style.transform = `translate(${dx * k}px, ${dy * k}px)`;
   $('fairy').classList.toggle('near', dist < 130);
 });

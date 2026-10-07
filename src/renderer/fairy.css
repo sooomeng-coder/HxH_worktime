@@ -1,6 +1,5 @@
 :root {
   --ink: #2b2f36;
-  --line: #dfe6ee;
   --suit: #a9d5f0;
   --bubble-bg: rgba(255, 255, 255, 0.96);
 }
@@ -44,42 +43,28 @@ html, body {
   50% { translate: 0 -4px; }
 }
 
-.wing circle { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
-.wing { transform-origin: 80px 120px; animation: flutter 0.7s ease-in-out infinite alternate; }
-@keyframes flutter { to { transform: scaleX(1.05); } }
-
-.suit { fill: var(--suit); }
-.sole { fill: #9c7b61; }
-.collar { fill: #f6eb9f; }
-.hand { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
-.ear { fill: #1f1f22; }
-.head { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
-.lcd { fill: #cfe7ee; stroke: #26292e; stroke-width: 3; }
+#fairy svg { display: block; margin: 0 auto; overflow: visible; }
 #lcd {
   font-family: "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 18px;
+  font-size: 64px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   fill: #1c2730;
 }
 #eyes { transition: transform 0.15s ease-out; }
 #eyes ellipse { fill: #1f1f22; }
 .glint { fill: #fff; }
-.eye-closed path { fill: none; stroke: #1f1f22; stroke-width: 2.4; stroke-linecap: round; }
+.eye-closed path { fill: none; stroke: #1f1f22; stroke-width: 7; stroke-linecap: round; }
 .eye-closed { display: none; }
-.cheek { fill: #b8606c; opacity: 0.85; }
-.mouth { fill: #f19caa; }
 
-/* 퇴근 시각이 지나면 LCD가 깜빡이고 입이 커짐 */
+/* 퇴근 시각이 지나면 LCD가 깜빡임 */
 body.due #lcd { animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0.25; } }
-body.due .mouth { d: path("M68 74 Q80 98 92 74 Q80 78 68 74 Z"); }
 
 /* 타이머를 종료하면 눈 감고 쉼 */
 body.ended .eye-open { display: none; }
 body.ended .eye-closed { display: inline; }
-body.ended .mouth { d: path("M75 79 Q80 84 85 79 Q80 80 75 79 Z"); }
 body.ended #fairy { animation-duration: 6s; }
 
 /* ── 설정 버튼 ── */
